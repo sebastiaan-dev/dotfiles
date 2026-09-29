@@ -1,7 +1,7 @@
 # dotfiles
 
 Personal macOS configuration managed with [chezmoi](https://www.chezmoi.io/),
-with [nanobrew](https://github.com/justrach/nanobrew) for packages.
+with [Homebrew](https://brew.sh/) for packages.
 
 ## Bootstrap a new Mac
 
@@ -19,18 +19,18 @@ script before running it.
 The script:
 
 1. Requests Apple's Command Line Tools if missing; full Xcode is not required.
-2. Installs nanobrew if missing (its installer may ask for your administrator password).
-3. Installs chezmoi in `~/.local/bin` if missing.
+2. Installs Homebrew if missing (its installer may ask for your administrator password).
+3. Initializes Homebrew and installs chezmoi with `brew` if missing.
 4. Fetches this repository and applies its configuration with `chezmoi init --apply`.
 
 **When the Command Line Tools installer opens, finish installing and rerun
 `bash bootstrap.sh`.** The first run exits without installing the remaining tools.
-Already installed prerequisites are reused on subsequent runs. Bootstrap checks
-that `nb` is available without invoking a version command, since supported version
-commands differ between nanobrew releases.
+Already installed prerequisites are reused on subsequent runs. Homebrew uses
+`/opt/homebrew` on Apple Silicon and `/usr/local` on Intel Macs. The bootstrap
+and managed Zsh configuration initialize it with `brew shellenv`.
 
 Applying the repository installs the CLI tools and apps listed in `Brewfile`
-through nanobrew, installs cmake-format with uv, and writes managed configuration.
+through Homebrew, installs cmake-format with uv, and writes managed configuration.
 The package hook runs on first apply and whenever
 `Brewfile` changes. Existing package versions are not automatically upgraded.
 
@@ -191,10 +191,11 @@ Review the diff before applying over an existing Neovim configuration.
 The package list lives in `Brewfile`. To reinstall missing packages manually:
 
 ```sh
-nb bundle install ~/Brewfile
+brew bundle install --no-upgrade --file=~/Brewfile
 ```
 
-Nanobrew expects `Nanobrew` by default, so pass the Brewfile path explicitly.
+The hook uses `--no-upgrade` to install missing packages while keeping existing
+versions. Third-party taps for Bun and AeroSpace are declared in the Brewfile.
 
 ## Update an existing Mac
 
@@ -204,4 +205,4 @@ chezmoi update
 
 This pulls and applies the latest committed configuration. If `Brewfile` changed,
 the package hook installs newly listed packages. Removing a package from the list
-does not uninstall it. To upgrade installed packages separately, run `nb upgrade`.
+does not uninstall it. To upgrade installed packages separately, run `brew upgrade`.

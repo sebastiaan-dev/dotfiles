@@ -25,24 +25,23 @@ if ! xcode-select -p >/dev/null 2>&1 || ! xcrun --find clang >/dev/null 2>&1; th
 fi
 
 git --version >/dev/null
-export PATH="$HOME/.local/bin:/opt/nanobrew/prefix/bin:$PATH"
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
 
 bootstrap_tmp="$(mktemp -d)"
 trap 'rm -rf "$bootstrap_tmp"' EXIT
 
-if ! command -v nb >/dev/null 2>&1; then
-  echo 'Installing nanobrew...'
-  curl -fsSL https://nanobrew.trilok.ai/install -o "$bootstrap_tmp/nanobrew-install.sh"
-  bash "$bootstrap_tmp/nanobrew-install.sh"
-  nb init
+if ! command -v brew >/dev/null 2>&1; then
+  echo 'Installing Homebrew...'
+  curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh -o "$bootstrap_tmp/homebrew-install.sh"
+  /bin/bash "$bootstrap_tmp/homebrew-install.sh"
 fi
 
-# Install chezmoi independently so bootstrapping does not depend on bottle support.
+# Load the installed prefix, including bin, sbin, and Homebrew environment variables.
+eval "$(brew shellenv)"
+
 if ! command -v chezmoi >/dev/null 2>&1; then
-  echo 'Installing chezmoi...'
-  mkdir -p "$HOME/.local/bin"
-  curl -fsSL https://get.chezmoi.io -o "$bootstrap_tmp/chezmoi-install.sh"
-  sh "$bootstrap_tmp/chezmoi-install.sh" -b "$HOME/.local/bin"
+  echo 'Installing chezmoi with Homebrew...'
+  brew install chezmoi
 fi
 chezmoi --version
 
@@ -50,4 +49,4 @@ printf 'Applying dotfiles from %s...\n' "$DOTFILES_REPO"
 chezmoi init --apply "$DOTFILES_REPO"
 
 echo 'Bootstrap complete. Open a new terminal to load your shell configuration.'
-echo 'Include ~/.local/bin and /opt/nanobrew/prefix/bin in your managed shell PATH.'
+echo 'Homebrew is initialized by your managed shell configuration.'

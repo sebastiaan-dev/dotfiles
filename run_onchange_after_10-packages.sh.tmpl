@@ -4,14 +4,15 @@ set -euo pipefail
 
 # Rerun when the package list changes.
 # Brewfile hash: {{ include "Brewfile" | sha256sum }}
-export PATH="$HOME/.local/bin:/opt/nanobrew/prefix/bin:$PATH"
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
 
-if ! command -v nb >/dev/null 2>&1; then
-  echo 'nanobrew is missing. Run bootstrap.sh first.' >&2
+if ! command -v brew >/dev/null 2>&1; then
+  echo 'Homebrew is missing. Run bootstrap.sh first.' >&2
   exit 1
 fi
 
-nb bundle install {{ joinPath .chezmoi.destDir "Brewfile" | quote }}
+eval "$(brew shellenv)"
+brew bundle install --no-upgrade --file={{ joinPath .chezmoi.destDir "Brewfile" | quote }}
 
 # cmake-format is distributed by the upstream cmakelang Python package.
 # Python 3.11 preserves compatibility with its older Python tooling.

@@ -1,7 +1,12 @@
 # Tools installed by bootstrap.sh.
 typeset -U path
-path=("$HOME/.local/bin" /opt/nanobrew/prefix/bin "$HOME/go/bin" "$HOME/.cargo/bin" $path)
+path=(/opt/homebrew/bin /usr/local/bin "$HOME/.local/bin" "$HOME/go/bin" "$HOME/.cargo/bin" $path)
 export PATH
+
+# Initialize Homebrew on Apple Silicon or Intel Macs.
+if command -v brew >/dev/null 2>&1; then
+  eval "$(brew shellenv)"
+fi
 
 # Use the managed ccache configuration on macOS and Linux.
 export CCACHE_CONFIGPATH="$HOME/.config/ccache/ccache.conf"

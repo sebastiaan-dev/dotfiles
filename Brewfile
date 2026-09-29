@@ -1,3 +1,10 @@
+# Third-party package sources
+tap "oven-sh/bun"
+tap "nikitabobko/tap"
+
+# Dotfile manager
+brew "chezmoi"
+
 # Shell and terminal tools
 brew "tmux"
 brew "atuin"
