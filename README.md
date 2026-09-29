@@ -21,7 +21,9 @@ The script:
 1. Requests Apple's Command Line Tools if missing; full Xcode is not required.
 2. Installs Homebrew if missing (its installer may ask for your administrator password).
 3. Initializes Homebrew and installs chezmoi with `brew` if missing.
-4. Fetches this repository and applies its configuration with `chezmoi init --apply`.
+4. Initializes this repository with `chezmoi init`, then pulls and applies the
+   latest committed configuration with `chezmoi update`. Rerunning bootstrap
+   refreshes an existing chezmoi checkout before applying its setup hooks.
 
 **When the Command Line Tools installer opens, finish installing and rerun
 `bash bootstrap.sh`.** The first run exits without installing the remaining tools.
@@ -206,3 +208,17 @@ chezmoi update
 This pulls and applies the latest committed configuration. If `Brewfile` changed,
 the package hook installs newly listed packages. Removing a package from the list
 does not uninstall it. To upgrade installed packages separately, run `brew upgrade`.
+
+## An old package hook still asks for the previous package manager
+
+The checkout under `~/.local/share/chezmoi` may be behind your dotfiles repo.
+Commit and push the Homebrew changes to GitHub, then run:
+
+```sh
+chezmoi update
+```
+
+This pulls the updated package hook before applying it. If you downloaded
+`bootstrap.sh` earlier, download it again after pushing the change. Updates may
+stop if the chezmoi checkout contains conflicting local edits; preserve those
+edits and resolve the Git conflict before retrying.

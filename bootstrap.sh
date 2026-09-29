@@ -45,8 +45,10 @@ if ! command -v chezmoi >/dev/null 2>&1; then
 fi
 chezmoi --version
 
-printf 'Applying dotfiles from %s...\n' "$DOTFILES_REPO"
-chezmoi init --apply "$DOTFILES_REPO"
+printf 'Refreshing dotfiles from %s...\n' "$DOTFILES_REPO"
+# Initialize without applying stale hooks, then pull and apply the latest commit.
+chezmoi init "$DOTFILES_REPO"
+chezmoi update
 
 echo 'Bootstrap complete. Open a new terminal to load your shell configuration.'
 echo 'Homebrew is initialized by your managed shell configuration.'
