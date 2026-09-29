@@ -1,0 +1,13 @@
+# Personal mise configuration, local/environment variants, and lockfiles.
+mise.toml
+mise.*.toml
+.mise.toml
+.mise.*.toml
+mise.lock
+mise.*.lock
+.mise.lock
+.mise.*.lock
+
+# Grouped mise configuration and tasks.
+mise/
+.mise/

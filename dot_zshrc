@@ -1,0 +1,35 @@
+# Tools installed by bootstrap.sh.
+typeset -U path
+path=("$HOME/.local/bin" /opt/nanobrew/prefix/bin "$HOME/go/bin" "$HOME/.cargo/bin" $path)
+export PATH
+
+# Use the managed ccache configuration on macOS and Linux.
+export CCACHE_CONFIGPATH="$HOME/.config/ccache/ccache.conf"
+
+# Activate per-project tool versions and environments.
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
+
+# Keep machine-specific shell configuration outside the repository.
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+
+# fzf file/directory widgets; Atuin below keeps ownership of Ctrl-R.
+if command -v fzf >/dev/null 2>&1; then
+  eval "$(fzf --zsh)"
+fi
+
+# Atuin replaces Ctrl-R history search; keep normal Up-arrow behavior.
+if command -v atuin >/dev/null 2>&1; then
+  eval "$(atuin init zsh --disable-up-arrow)"
+fi
+
+# Smart directory navigation: z <name> and zi for interactive selection.
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
+
+# Allow Worktrunk to switch the current shell into a worktree.
+if command -v wt >/dev/null 2>&1; then
+  eval "$(wt config shell init zsh)"
+fi

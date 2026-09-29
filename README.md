@@ -25,11 +25,14 @@ The script:
 
 **When the Command Line Tools installer opens, finish installing and rerun
 `bash bootstrap.sh`.** The first run exits without installing the remaining tools.
-Already installed prerequisites are reused on subsequent runs.
+Already installed prerequisites are reused on subsequent runs. The nanobrew
+version check uses `nb version` for compatibility with releases that do not
+accept `nb --version`.
 
-Applying the repository also runs any chezmoi setup scripts it contains. This
-repository currently has no managed configuration or package-install hooks;
-bootstrap prepares the tools, and configurations can be added incrementally.
+Applying the repository installs the CLI tools and apps listed in `Brewfile`
+through nanobrew, installs cmake-format with uv, and writes managed configuration.
+The package hook runs on first apply and whenever
+`Brewfile` changes. Existing package versions are not automatically upgraded.
 
 ## Private repository
 
@@ -58,16 +61,140 @@ The default source directory is `~/.local/share/chezmoi`; it is a separate check
 from any repository under `~/repos`. Make subsequent edits in the checkout you
 intend to commit, and pull changes into the other checkout when needed.
 
-Include this in your managed `~/.zshrc` so the installed tools are available in
-new terminals:
+## Terminal setup
+
+| Tool | Managed configuration | Behavior |
+| --- | --- | --- |
+| tmux | `~/.tmux.conf` | Ctrl-b prefix, mouse support, numbered windows/panes starting at 1 |
+| Ghostty | `~/.config/ghostty/config.ghostty` | Default font/colors, 14-point font, window padding |
+| Atuin | `~/.config/atuin/config.toml` | Local history, fuzzy Ctrl-R search; normal Up-arrow behavior |
+| Zsh | `~/.zshrc` | Tool, Go, and Cargo PATH; mise, fzf, Atuin, and zoxide initialization |
+| ccache | `~/.config/ccache/ccache.conf` | 50 GB maximum cache size |
+| LazyVim | `~/.config/nvim/` | Managed Neovim configuration |
+
+The managed `.zshrc` sources `~/.zshrc.local` for machine-specific additions.
+Before the first apply on an existing Mac, review `chezmoi diff` and move any
+existing shell customizations you want to retain into that local file. Avoid
+adding a second Atuin initialization there.
+
+Open a new terminal after applying. Start tmux with `tmux new -s main`.
+Within tmux, use Ctrl-b then `|` or `-` to split panes, `d` to detach, and `r` to
+reload the configuration. Ghostty configuration reloads with Cmd-Shift-comma;
+macOS-specific Ghostty configuration may override the managed XDG file.
+
+To import your existing shell history once:
 
 ```sh
-export PATH="$HOME/.local/bin:/opt/nanobrew/prefix/bin:$PATH"
+atuin import auto
 ```
 
-For packages, add a Brewfile and a chezmoi package-install script that runs
-`nb bundle install` after the file has been applied. Keep plaintext credentials,
-private keys, caches, and application data out of the repository.
+Atuin account setup and history sync are optional. To enable automatic sync,
+configure your account and change `auto_sync` in the managed config to `true`.
+Keep Atuin databases, credentials, and encryption keys outside this repository.
+
+## Developer tools
+
+`Brewfile` includes CMake, Ninja, ccache, OpenSSL 3, Go, D2 (d2lang), samply,
+zx, AWS CLI, Colima, Docker CLI, eza, bat, aria2, ripgrep, lazygit, lnav,
+hyperfine, nnn, Typst, Obsidian, Raycast, GitHub CLI, jq, yq, just, LLVM,
+clang-format, mise, git-delta, ShellCheck, Rust (including Cargo), Bun, and
+AeroSpace, and Worktrunk, alongside the terminal tools.
+
+[cmake-format](https://cmake-format.readthedocs.io/en/latest/installation.html)
+is supplied by `cmakelang[YAML]==0.6.13`, installed with uv using Python 3.11.
+The package hook handles this after installing uv. Its executables are available
+under `~/.local/bin`.
+
+The shell sets `CCACHE_CONFIGPATH` to the managed configuration, whose
+`max_size = 50GB` sets a decimal 50 GB limit without preallocating that space.
+Use ccache with a CMake project explicitly:
+
+```sh
+cmake -S . -B build -G Ninja \
+  -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+cmake --build build
+ccache --show-stats
+```
+
+zoxide provides `z` and `zi`; Go-installed tools in `~/go/bin` and Cargo-installed
+tools in `~/.cargo/bin` are on PATH. fzf supplies Ctrl-T file selection and Alt-C
+directory selection; Atuin retains Ctrl-R. fd and ripgrep are also installed.
+Colima is installed without starting a VM automatically. Start its Docker runtime
+when needed with `colima start`, then use the installed `docker` CLI.
+Obsidian vaults and AWS credentials stay outside the dotfiles repository.
+
+### AeroSpace
+
+[AeroSpace](https://nikitabobko.github.io/AeroSpace/guide) is installed from
+`nikitabobko/tap/aerospace`. Its managed configuration is `~/.aerospace.toml`.
+Open AeroSpace once and grant Accessibility access in System Settings when
+prompted. The configuration enables tiling and starts AeroSpace at login.
+
+- Option-H/J/K/L: focus left/down/up/right.
+- Option-Shift-H/J/K/L: move the focused window.
+- Option-1 through Option-9: switch workspaces.
+- Option-Shift-1 through Option-Shift-9: move a window to a workspace.
+- Option-slash: toggle horizontal/vertical tiles; Option-comma: accordion layout.
+- Option-F: toggle fullscreen; Option-Shift-Space: toggle floating/tiling.
+- Option-Shift-R: reload the configuration.
+
+Use only one AeroSpace configuration location; an existing
+`~/.config/aerospace/aerospace.toml` alongside `~/.aerospace.toml` is ambiguous.
+Bun is installed from `oven-sh/bun/bun`; Cargo comes with the `rust` package.
+
+### Worktrunk
+
+[Worktrunk](https://worktrunk.dev/) is installed as `worktrunk`; its command is
+`wt`. The managed Zsh configuration initializes its shell integration so
+`wt switch` changes your current directory. Open a new terminal after applying.
+
+```sh
+wt list
+wt switch --create my-feature
+wt switch main
+```
+
+### Git and mise
+
+The managed `~/.gitconfig` configures:
+
+- User: Sebastiaan Gerritsen (`sebastiaan@ducklabs.com`).
+- Default branch for new repositories: `main`.
+- `git pull`: fast-forward when possible, otherwise merge instead of rebasing.
+  Conflicts remain for manual resolution.
+- delta as Git's pager and interactive diff filter.
+- Global ignore rules in `~/.config/git/ignore` for mise configuration files,
+  environment/local variants, lockfiles, and mise configuration directories.
+
+These ignore rules affect untracked files in all repositories. Existing tracked
+mise files remain tracked. Use `git add -f` if you intentionally want to commit a
+new mise file despite the global ignore rules.
+
+mise is activated in Zsh for per-project tool versions and environments.
+Choose versions with `mise use`; no language versions are installed through mise
+automatically by these dotfiles.
+
+### LazyVim
+
+[LazyVim](https://www.lazyvim.org/) is configured under `~/.config/nvim` and runs
+with `nvim`. The first launch downloads lazy.nvim and installs LazyVim's plugins;
+network access is required. Run `:LazyHealth` afterward to check the setup.
+Neovim, fd, fzf, tree-sitter-cli, and ripgrep are installed for its standard tools.
+Ghostty already provides a bundled font with the icons LazyVim uses.
+
+Keep customizations in `lua/config/` and plugin specs in `lua/plugins/` in this
+repository. Plugin updates are managed with `:Lazy update`; review and optionally
+import `~/.config/nvim/lazy-lock.json` with chezmoi to track exact plugin versions.
+Review the diff before applying over an existing Neovim configuration.
+
+The package list lives in `Brewfile`. To reinstall missing packages manually:
+
+```sh
+nb bundle install ~/Brewfile
+```
+
+Nanobrew expects `Nanobrew` by default, so pass the Brewfile path explicitly.
 
 ## Update an existing Mac
 
@@ -75,5 +202,6 @@ private keys, caches, and application data out of the repository.
 chezmoi update
 ```
 
-This pulls and applies the latest committed configuration, including any setup
-scripts. It does not automatically upgrade installed packages.
+This pulls and applies the latest committed configuration. If `Brewfile` changed,
+the package hook installs newly listed packages. Removing a package from the list
+does not uninstall it. To upgrade installed packages separately, run `nb upgrade`.

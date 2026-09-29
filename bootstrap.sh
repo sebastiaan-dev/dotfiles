@@ -35,7 +35,7 @@ if ! command -v nb >/dev/null 2>&1; then
   curl -fsSL https://nanobrew.trilok.ai/install -o "$bootstrap_tmp/nanobrew-install.sh"
   bash "$bootstrap_tmp/nanobrew-install.sh"
 fi
-nb --version
+nb version
 
 # Install chezmoi independently so bootstrapping does not depend on bottle support.
 if ! command -v chezmoi >/dev/null 2>&1; then

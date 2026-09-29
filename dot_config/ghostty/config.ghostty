@@ -1,0 +1,4 @@
+# Use Ghostty's bundled font and default colors.
+font-size = 14
+window-padding-x = 8
+window-padding-y = 8
