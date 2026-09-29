@@ -25,9 +25,9 @@ The script:
 
 **When the Command Line Tools installer opens, finish installing and rerun
 `bash bootstrap.sh`.** The first run exits without installing the remaining tools.
-Already installed prerequisites are reused on subsequent runs. The nanobrew
-version check uses `nb version` for compatibility with releases that do not
-accept `nb --version`.
+Already installed prerequisites are reused on subsequent runs. Bootstrap checks
+that `nb` is available without invoking a version command, since supported version
+commands differ between nanobrew releases.
 
 Applying the repository installs the CLI tools and apps listed in `Brewfile`
 through nanobrew, installs cmake-format with uv, and writes managed configuration.
