@@ -37,7 +37,7 @@ brew "ccache"
 brew "openssl@3"
 brew "go"
 brew "rust" # Includes cargo
-brew "oven-sh/bun/bun"
+brew "oven-sh/bun/bun", trusted: true
 brew "d2"
 brew "samply"
 brew "zx"
@@ -61,4 +61,4 @@ brew "uv"
 cask "ghostty"
 cask "obsidian"
 cask "raycast"
-cask "nikitabobko/tap/aerospace"
+cask "nikitabobko/tap/aerospace", trusted: true

@@ -198,6 +198,21 @@ brew bundle install --no-upgrade --file=~/Brewfile
 
 The hook uses `--no-upgrade` to install missing packages while keeping existing
 versions. Third-party taps for Bun and AeroSpace are declared in the Brewfile.
+Their individual package entries use `trusted: true`, so Homebrew Bundle grants
+trust before installing them without trusting every package in either tap.
+See [Homebrew's Brewfile trust documentation](https://docs.brew.sh/Brew-Bundle-and-Brewfile#advanced-brewfiles).
+
+If an older checkout fails with `refusing to load formula ... from untrusted tap`,
+trust the two packages explicitly and rerun the bootstrap script:
+
+```sh
+brew trust --formula oven-sh/bun/bun
+brew trust --cask nikitabobko/tap/aerospace
+bash bootstrap.sh
+```
+
+Commit and push the updated Brewfile, then run `chezmoi update` on other Macs to
+apply the persistent trust declarations.
 
 ## Update an existing Mac
 
