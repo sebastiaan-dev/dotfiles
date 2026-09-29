@@ -1,0 +1,4 @@
+# Repository documentation and bootstrap entry point are not home-directory files.
+README.md
+bootstrap.sh
+.gitignore
