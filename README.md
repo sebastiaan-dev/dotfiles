@@ -68,8 +68,8 @@ intend to commit, and pull changes into the other checkout when needed.
 
 | Tool | Managed configuration | Behavior |
 | --- | --- | --- |
-| tmux | `~/.tmux.conf` | Ctrl-Space prefix, Alt-arrow pane navigation, custom theme, tmux-fzf and extrakto |
-| Ghostty | `~/.config/ghostty/config.ghostty` | Default font/colors, 14-point font, window padding |
+| tmux | `~/.tmux.conf` | Ctrl-Space prefix, Alt-arrow pane navigation, Nord theme, tmux-fzf and extrakto |
+| Ghostty | `~/.config/ghostty/config.ghostty` | Nord colors, bundled 14-point font, window padding |
 | Atuin | `~/.config/atuin/config.toml` | Local history, fuzzy Ctrl-R search; normal Up-arrow behavior |
 | Zsh | `~/.zshrc` | Tool, Go, and Cargo PATH; mise, fzf, Atuin, and zoxide initialization |
 | ccache | `~/.config/ccache/ccache.conf` | 50 GB maximum cache size |
@@ -100,15 +100,19 @@ Within tmux, press Ctrl-Space, then:
 
 Alt-arrow keys move between panes without the prefix. Windows and panes start
 at 1, mouse support is disabled, and pane history retains 10,000 lines.
-The configuration is translated from `modules/home/shell.nix` in `vps-nix`,
-including its palette and status bar. It defines the missing active-border red
-and fixes the source's `update-environment -r` line to reset the default variable
-list with `set -gu update-environment`.
+Key bindings and behavior are translated from `modules/home/shell.nix` in
+`vps-nix`. The configuration fixes the source's `update-environment -r` line to
+reset the default variable list with `set -gu update-environment`.
 
-chezmoi installs tmux-fzf and extrakto under `~/.tmux/plugins` from the pinned,
-checksum-verified archives in `.chezmoiexternal.toml`. The first apply requires
-network access; fzf and Python are installed through Homebrew. To update a
-plugin, change its commit in the archive URL and update its SHA256 checksum.
+Nord tmux supplies the status bar, window styles, pane borders, messages, and
+clock colors. Its theme uses the terminal's ANSI palette, so Ghostty also loads
+its built-in Nord theme.
+
+chezmoi installs tmux-fzf, extrakto, and Nord tmux under `~/.tmux/plugins` from
+the pinned, checksum-verified archives in `.chezmoiexternal.toml`. The first
+apply requires network access; fzf and Python are installed through Homebrew.
+To update a plugin, change its commit in the archive URL and update its SHA256
+checksum.
 
 Ghostty configuration reloads with Cmd-Shift-comma;
 macOS-specific Ghostty configuration may override the managed XDG file.
