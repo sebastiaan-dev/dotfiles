@@ -20,6 +20,7 @@ brew "nnn"
 
 # Git, scripting, and project tools
 brew "gh"
+brew "gita"
 brew "worktrunk"
 brew "jq"
 brew "yq"
@@ -37,6 +38,7 @@ brew "llvm"
 brew "clang-format"
 brew "ccache"
 brew "openssl@3"
+brew "python" # Required by tmux's extrakto plugin
 brew "go"
 brew "rust" # Includes cargo
 brew "oven-sh/bun/bun", trusted: true

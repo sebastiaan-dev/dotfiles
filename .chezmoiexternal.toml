@@ -1,0 +1,12 @@
+# Pin tmux plugins to reviewed revisions for reproducible installs.
+[".tmux/plugins/tmux-fzf"]
+    type = "archive"
+    url = "https://github.com/sainnhe/tmux-fzf/archive/e5f427e9dcf180ca92e2f8af47ba07f644fd4585.tar.gz"
+    stripComponents = 1
+    checksum.sha256 = "2e9459371e38b3e17585b229c82dd25fc0b5567a9dc4a647238fcede6cf2ff9f"
+
+[".tmux/plugins/extrakto"]
+    type = "archive"
+    url = "https://github.com/laktak/extrakto/archive/d1af77988081dae496fa4a1f5e5e6bc9ef66767f.tar.gz"
+    stripComponents = 1
+    checksum.sha256 = "1042858558b14f77993b0d576b381abd86ed0cd52f4a10d60928fbc7a0d24429"

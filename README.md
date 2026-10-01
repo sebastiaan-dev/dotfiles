@@ -32,7 +32,8 @@ Already installed prerequisites are reused on subsequent runs. Homebrew uses
 and managed Zsh configuration initialize it with `brew shellenv`.
 
 Applying the repository installs the CLI tools and apps listed in `Brewfile`
-through Homebrew, installs cmake-format with uv, and writes managed configuration.
+through Homebrew, installs cmake-format with uv, downloads tmux plugins, and
+writes managed configuration.
 The package hook runs on first apply and whenever
 `Brewfile` changes. Existing package versions are not automatically upgraded.
 
@@ -67,7 +68,7 @@ intend to commit, and pull changes into the other checkout when needed.
 
 | Tool | Managed configuration | Behavior |
 | --- | --- | --- |
-| tmux | `~/.tmux.conf` | Ctrl-b prefix, mouse support, numbered windows/panes starting at 1 |
+| tmux | `~/.tmux.conf` | Ctrl-Space prefix, Alt-arrow pane navigation, custom theme, tmux-fzf and extrakto |
 | Ghostty | `~/.config/ghostty/config.ghostty` | Default font/colors, 14-point font, window padding |
 | Atuin | `~/.config/atuin/config.toml` | Local history, fuzzy Ctrl-R search; normal Up-arrow behavior |
 | Zsh | `~/.zshrc` | Tool, Go, and Cargo PATH; mise, fzf, Atuin, and zoxide initialization |
@@ -75,13 +76,41 @@ intend to commit, and pull changes into the other checkout when needed.
 | LazyVim | `~/.config/nvim/` | Managed Neovim configuration |
 
 The managed `.zshrc` sources `~/.zshrc.local` for machine-specific additions.
+Managed aliases cover navigation (`..`, `...`, `c`), file listings (`ll`, `la`,
+`lt`), Git (`g`, `gs`, `gd`, `gds`, `gl`), and tools (`lg`, `n`, `cz`).
+Define aliases in `~/.zshrc.local` to override these defaults.
 Before the first apply on an existing Mac, review `chezmoi diff` and move any
 existing shell customizations you want to retain into that local file. Avoid
 adding a second Atuin initialization there.
 
+The Zsh configuration is generated from `dot_zshrc.tmpl`. On macOS with hostname
+`c0c7db20dcdc` (this Amazon work Mac), chezmoi includes a conditional branch that
+prepends `~/.toolbox/bin` to PATH. Update the hostname condition if this Mac is
+renamed.
+
 Open a new terminal after applying. Start tmux with `tmux new -s main`.
-Within tmux, use Ctrl-b then `|` or `-` to split panes, `d` to detach, and `r` to
-reload the configuration. Ghostty configuration reloads with Cmd-Shift-comma;
+Within tmux, press Ctrl-Space, then:
+
+- `c`: open a window in the current directory.
+- `%`: split into left/right panes; `"`: split into top/bottom panes.
+- `d`: detach; `R` (Shift-R): reload the configuration.
+- `F` (Shift-F): open tmux-fzf to manage sessions, windows, and panes.
+- `Tab`: open extrakto to fuzzy-select text from terminal output; use Tab to
+  insert a selection or Enter to copy it to the clipboard.
+
+Alt-arrow keys move between panes without the prefix. Windows and panes start
+at 1, mouse support is disabled, and pane history retains 10,000 lines.
+The configuration is translated from `modules/home/shell.nix` in `vps-nix`,
+including its palette and status bar. It defines the missing active-border red
+and fixes the source's `update-environment -r` line to reset the default variable
+list with `set -gu update-environment`.
+
+chezmoi installs tmux-fzf and extrakto under `~/.tmux/plugins` from the pinned,
+checksum-verified archives in `.chezmoiexternal.toml`. The first apply requires
+network access; fzf and Python are installed through Homebrew. To update a
+plugin, change its commit in the archive URL and update its SHA256 checksum.
+
+Ghostty configuration reloads with Cmd-Shift-comma;
 macOS-specific Ghostty configuration may override the managed XDG file.
 
 To import your existing shell history once:
@@ -96,9 +125,9 @@ Keep Atuin databases, credentials, and encryption keys outside this repository.
 
 ## Developer tools
 
-`Brewfile` includes CMake, Ninja, ccache, OpenSSL 3, Go, D2 (d2lang), samply,
+`Brewfile` includes CMake, Ninja, ccache, OpenSSL 3, Python, Go, D2 (d2lang), samply,
 zx, AWS CLI, Colima, Docker CLI, eza, bat, aria2, ripgrep, lazygit, lnav,
-hyperfine, nnn, Typst, Obsidian, Raycast, GitHub CLI, jq, yq, just, LLVM,
+hyperfine, nnn, Typst, Obsidian, Raycast, GitHub CLI, gita, jq, yq, just, LLVM,
 clang-format, mise, git-delta, ShellCheck, Rust (including Cargo), Bun, and
 AeroSpace, Worktrunk, HTTPie CLI, watchexec, Discord, and Zen Browser, alongside
 the terminal tools.
