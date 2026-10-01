@@ -214,7 +214,9 @@ The managed `~/.gitconfig` configures:
 - Default branch for new repositories: `main`.
 - `git pull`: fast-forward when possible, otherwise merge instead of rebasing.
   Conflicts remain for manual resolution.
-- delta as Git's pager and interactive diff filter.
+- Automatic coloring for terminal output (`color.ui = auto`).
+- delta as Git's pager and interactive diff filter, using Nord syntax
+  highlighting and colors for a dark background.
 - Global ignore rules in `~/.config/git/ignore` for mise configuration files,
   environment/local variants, lockfiles, and mise configuration directories.
 

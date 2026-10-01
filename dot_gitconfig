@@ -9,6 +9,9 @@
     rebase = false
     ff = true
 
+[color]
+    ui = auto
+
 [core]
     excludesFile = ~/.config/git/ignore
     pager = delta
@@ -18,3 +21,5 @@
 
 [delta]
     navigate = true
+    dark = true
+    syntax-theme = Nord
