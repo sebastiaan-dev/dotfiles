@@ -1,5 +1,5 @@
 # Tools installed by bootstrap.sh.
-typeset -U path
+typeset -U path fpath
 path=(/opt/homebrew/bin /usr/local/bin "$HOME/.local/bin" "$HOME/go/bin" "$HOME/.cargo/bin" $path)
 export PATH
 
@@ -65,6 +65,16 @@ fi
 # Amazon Toolbox on this work Mac.
 export PATH="$HOME/.toolbox/bin:$PATH"
 {{ end -}}
+
+# Nord's bracketed, multiline Igloo prompt.
+if [[ -r "$HOME/.config/zsh/prompts/prompt_igloo_setup" ]]; then
+  [[ -r "$HOME/.config/zsh/git-prompt.sh" ]] && source "$HOME/.config/zsh/git-prompt.sh"
+  fpath=("$HOME/.config/zsh/prompts" $fpath)
+  IGLOO_ZSH_PROMPT_THEME_ALWAYS_SHOW_USER=${IGLOO_ZSH_PROMPT_THEME_ALWAYS_SHOW_USER:-true}
+  autoload -Uz promptinit
+  promptinit
+  prompt igloo
+fi
 
 # Load syntax highlighting after all Zsh widgets and hooks.
 if [[ -n "${HOMEBREW_PREFIX:-}" && -r "${HOMEBREW_PREFIX:-}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
