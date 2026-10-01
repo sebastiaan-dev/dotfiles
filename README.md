@@ -69,7 +69,7 @@ intend to commit, and pull changes into the other checkout when needed.
 | Tool | Managed configuration | Behavior |
 | --- | --- | --- |
 | tmux | `~/.tmux.conf` | Ctrl-Space prefix, Alt-arrow pane navigation, Nord theme, tmux-fzf and extrakto |
-| Ghostty | `~/.config/ghostty/config.ghostty` | Nord colors, bundled 14-point font, window padding |
+| Ghostty | `~/.config/ghostty/config.ghostty` | Nord colors, bundled 14-point font, zero padding, TUI background extension |
 | Atuin | `~/.config/atuin/config.toml` | Local history, fuzzy Ctrl-R search; normal Up-arrow behavior |
 | Zsh | `~/.zshrc` | Compact Nord prompt, tool PATH, mise, fzf, Atuin, zoxide, and syntax highlighting |
 | ccache | `~/.config/ccache/ccache.conf` | 50 GB maximum cache size |
@@ -100,6 +100,15 @@ The input arrow turns red after a failed command.
 
 Ghostty's Cmd+K clears the screen and scrollback, then sends Ctrl+L to redraw
 both prompt lines.
+Window padding is disabled. Any space left over from fitting whole character
+cells is balanced between the edges. Ghostty's `extend` mode fills edge gaps
+with nearby background colors, but avoids vertical extension on rows containing
+Powerline glyphs, preserving the shapes in the Nord tmux footer.
+On macOS, manual window resizing snaps to whole cells. Tiled or fullscreen
+windows can still leave a small gap below the footer.
+If switching back to `window-padding-color = background`, open a new Ghostty
+tab or window and reattach tmux. Ghostty 1.3.1 can retain the old extension
+flags in existing terminals after a configuration reload.
 
 The theme is managed at `~/.config/zsh/prompts/prompt_nord_setup`; edit its
 source in this repository to customize the layout. Git's prompt helper at
@@ -115,14 +124,22 @@ prepends `~/.toolbox/bin` to PATH. Update the hostname condition if this Mac is
 renamed.
 
 Open a new terminal after applying. Start tmux with `tmux new -s main`.
-Within tmux, press Ctrl-Space, then:
+Within tmux, press Ctrl-Space, release it, then:
 
 - `c`: open a window in the current directory.
 - `%`: split into left/right panes; `"`: split into top/bottom panes.
+- `n` / `p`: next / previous window; `1`–`9`: select a window.
+- `x`: close the current pane (with confirmation).
 - `d`: detach; `R` (Shift-R): reload the configuration.
+- `[`: enter scroll/copy mode; `q`: leave it.
+- `?`: list all key bindings.
 - `F` (Shift-F): open tmux-fzf to manage sessions, windows, and panes.
 - `Tab`: open extrakto to fuzzy-select text from terminal output; use Tab to
   insert a selection or Enter to copy it to the clipboard.
+
+The macOS keyboard hook disables the input-source shortcut when it is assigned
+to Ctrl-Space, letting that key reach tmux. A customized input-source shortcut
+is preserved. Press Ctrl-Space twice to send it to the application.
 
 Alt-arrow keys move between panes without the prefix. Windows and panes start
 at 1, mouse support is disabled, and pane history retains 10,000 lines.

@@ -1,8 +1,13 @@
 # Use Ghostty's bundled font and Nord colors.
 theme = Nord
 font-size = 14
-window-padding-x = 8
-window-padding-y = 8
+# Fill TUI edge gaps while preserving Powerline status-bar shapes.
+window-padding-x = 0
+window-padding-y = 0
+window-padding-balance = true
+window-padding-color = extend
+# Snap manual window resizing to whole terminal cells on macOS.
+window-step-resize = true
 
 # Clear scrollback, then let the shell redraw the entire multiline prompt.
 keybind = super+k=clear_screen

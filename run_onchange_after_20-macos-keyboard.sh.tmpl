@@ -1,0 +1,42 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+set -euo pipefail
+
+# Let Ctrl-Space reach tmux instead of switching macOS input sources.
+shortcut_file=$(mktemp)
+trap 'rm -f "$shortcut_file"' EXIT
+
+if /usr/bin/defaults export com.apple.symbolichotkeys - 2>/dev/null |
+    /usr/bin/plutil -extract AppleSymbolicHotKeys.60 xml1 -o "$shortcut_file" - 2>/dev/null; then
+  keycode=$(/usr/bin/plutil -extract value.parameters.1 raw "$shortcut_file")
+  modifiers=$(/usr/bin/plutil -extract value.parameters.2 raw "$shortcut_file")
+  # Keep a user-defined replacement shortcut.
+  if [[ "$keycode" != 49 || "$modifiers" != 262144 ]]; then
+    exit 0
+  fi
+  enabled=$(/usr/bin/plutil -extract enabled raw "$shortcut_file")
+  [[ "$enabled" == true ]] || exit 0
+  /usr/bin/plutil -replace enabled -bool false "$shortcut_file"
+else
+  # This is the default shortcut when it has no saved preferences yet.
+  cat > "$shortcut_file" <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>enabled</key><false/>
+  <key>value</key>
+  <dict>
+    <key>type</key><string>standard</string>
+    <key>parameters</key>
+    <array><integer>32</integer><integer>49</integer><integer>262144</integer></array>
+  </dict>
+</dict>
+</plist>
+PLIST
+fi
+
+/usr/bin/defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys \
+  -dict-add 60 "$(cat "$shortcut_file")"
+/System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
+{{- end }}
