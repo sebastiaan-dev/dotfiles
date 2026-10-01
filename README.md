@@ -98,6 +98,9 @@ hidden. Virtualenv takes precedence over Conda and pyenv. An active `MISE_ENV`
 adds a mise environment label. SSH sessions prepend `[user@host]`.
 The input arrow turns red after a failed command.
 
+Ghostty's Cmd+K clears the screen and scrollback, then sends Ctrl+L to redraw
+both prompt lines.
+
 The theme is managed at `~/.config/zsh/prompts/prompt_nord_setup`; edit its
 source in this repository to customize the layout. Git's prompt helper at
 `~/.config/zsh/git-prompt.sh` is installed from a pinned, checksum-verified file

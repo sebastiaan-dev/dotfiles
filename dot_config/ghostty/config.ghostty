@@ -3,3 +3,7 @@ theme = Nord
 font-size = 14
 window-padding-x = 8
 window-padding-y = 8
+
+# Clear scrollback, then let the shell redraw the entire multiline prompt.
+keybind = super+k=clear_screen
+keybind = chain=text:\x0c
