@@ -27,6 +27,8 @@ brew "just"
 brew "mise"
 brew "git-delta"
 brew "shellcheck"
+brew "httpie"
+brew "watchexec"
 
 # Build tools and languages
 brew "cmake"
@@ -61,4 +63,6 @@ brew "uv"
 cask "ghostty"
 cask "obsidian"
 cask "raycast"
+cask "discord"
+cask "zen"
 cask "nikitabobko/tap/aerospace", trusted: true

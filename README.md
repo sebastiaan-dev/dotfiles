@@ -100,7 +100,8 @@ Keep Atuin databases, credentials, and encryption keys outside this repository.
 zx, AWS CLI, Colima, Docker CLI, eza, bat, aria2, ripgrep, lazygit, lnav,
 hyperfine, nnn, Typst, Obsidian, Raycast, GitHub CLI, jq, yq, just, LLVM,
 clang-format, mise, git-delta, ShellCheck, Rust (including Cargo), Bun, and
-AeroSpace, and Worktrunk, alongside the terminal tools.
+AeroSpace, Worktrunk, HTTPie CLI, watchexec, Discord, and Zen Browser, alongside
+the terminal tools.
 
 [cmake-format](https://cmake-format.readthedocs.io/en/latest/installation.html)
 is supplied by `cmakelang[YAML]==0.6.13`, installed with uv using Python 3.11.
