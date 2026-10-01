@@ -71,7 +71,7 @@ intend to commit, and pull changes into the other checkout when needed.
 | tmux | `~/.tmux.conf` | Ctrl-Space prefix, Alt-arrow pane navigation, Nord theme, tmux-fzf and extrakto |
 | Ghostty | `~/.config/ghostty/config.ghostty` | Nord colors, bundled 14-point font, window padding |
 | Atuin | `~/.config/atuin/config.toml` | Local history, fuzzy Ctrl-R search; normal Up-arrow behavior |
-| Zsh | `~/.zshrc` | Tool, Go, and Cargo PATH; mise, fzf, Atuin, and zoxide initialization |
+| Zsh | `~/.zshrc` | Tool, Go, and Cargo PATH; mise, fzf, Atuin, zoxide, and syntax highlighting |
 | ccache | `~/.config/ccache/ccache.conf` | 50 GB maximum cache size |
 | LazyVim | `~/.config/nvim/` | Managed Neovim configuration |
 
@@ -82,6 +82,9 @@ Define aliases in `~/.zshrc.local` to override these defaults.
 Before the first apply on an existing Mac, review `chezmoi diff` and move any
 existing shell customizations you want to retain into that local file. Avoid
 adding a second Atuin initialization there.
+
+`zsh-syntax-highlighting` colors commands as you type. Its script is loaded last,
+after local customizations, fzf, Atuin, and the other shell integrations.
 
 The Zsh configuration is generated from `dot_zshrc.tmpl`. On macOS with hostname
 `c0c7db20dcdc` (this Amazon work Mac), chezmoi includes a conditional branch that
