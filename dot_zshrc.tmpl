@@ -66,14 +66,13 @@ fi
 export PATH="$HOME/.toolbox/bin:$PATH"
 {{ end -}}
 
-# Nord's bracketed, multiline Igloo prompt.
-if [[ -r "$HOME/.config/zsh/prompts/prompt_igloo_setup" ]]; then
+# Compact Nord prompt: one information row above the command input.
+if [[ -r "$HOME/.config/zsh/prompts/prompt_nord_setup" ]]; then
   [[ -r "$HOME/.config/zsh/git-prompt.sh" ]] && source "$HOME/.config/zsh/git-prompt.sh"
   fpath=("$HOME/.config/zsh/prompts" $fpath)
-  IGLOO_ZSH_PROMPT_THEME_ALWAYS_SHOW_USER=${IGLOO_ZSH_PROMPT_THEME_ALWAYS_SHOW_USER:-true}
   autoload -Uz promptinit
   promptinit
-  prompt igloo
+  prompt nord
 fi
 
 # Load syntax highlighting after all Zsh widgets and hooks.

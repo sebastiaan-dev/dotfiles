@@ -71,7 +71,7 @@ intend to commit, and pull changes into the other checkout when needed.
 | tmux | `~/.tmux.conf` | Ctrl-Space prefix, Alt-arrow pane navigation, Nord theme, tmux-fzf and extrakto |
 | Ghostty | `~/.config/ghostty/config.ghostty` | Nord colors, bundled 14-point font, window padding |
 | Atuin | `~/.config/atuin/config.toml` | Local history, fuzzy Ctrl-R search; normal Up-arrow behavior |
-| Zsh | `~/.zshrc` | Igloo prompt, tool PATH, mise, fzf, Atuin, zoxide, and syntax highlighting |
+| Zsh | `~/.zshrc` | Compact Nord prompt, tool PATH, mise, fzf, Atuin, zoxide, and syntax highlighting |
 | ccache | `~/.config/ccache/ccache.conf` | 50 GB maximum cache size |
 | LazyVim | `~/.config/nvim/` | Managed Neovim configuration |
 
@@ -83,17 +83,25 @@ Before the first apply on an existing Mac, review `chezmoi diff` and move any
 existing shell customizations you want to retain into that local file. Avoid
 adding a second Atuin initialization there.
 
-Igloo provides Nord's bracketed, multiline prompt, showing the username, time,
-current directory, and Git branch/status/short commit when inside a repository.
-The hostname appears in SSH sessions; background jobs and failed commands
-add status indicators. Set `IGLOO_ZSH_PROMPT_THEME_ALWAYS_SHOW_USER=false` or
-`IGLOO_ZSH_PROMPT_THEME_HIDE_TIME=true` in `~/.zshrc.local` to hide those segments.
-Run `prompt -h igloo` for the theme's full configuration help.
+The local Nord prompt uses one information row above the command input:
 
-chezmoi installs the upstream theme at `~/.config/zsh/prompts/prompt_igloo_setup`
-and Git's prompt helper at `~/.config/zsh/git-prompt.sh`, using pinned,
-checksum-verified files from `.chezmoiexternal.toml`. The first apply requires
-network access.
+```text
+[~/project] - [main *+] - [venv:.venv]
+▶
+```
+
+The Git segment appears inside repositories and shows the branch plus markers
+for unstaged (`*`), staged (`+`), untracked (`%`), stashed (`$`), and upstream
+differences (`<`, `>`, `<>`, `=`). The environment segment appears for an active
+virtualenv, Conda environment, or pyenv selection; a `system` pyenv selection is
+hidden. Virtualenv takes precedence over Conda and pyenv. An active `MISE_ENV`
+adds a mise environment label. SSH sessions prepend `[user@host]`.
+The input arrow turns red after a failed command.
+
+The theme is managed at `~/.config/zsh/prompts/prompt_nord_setup`; edit its
+source in this repository to customize the layout. Git's prompt helper at
+`~/.config/zsh/git-prompt.sh` is installed from a pinned, checksum-verified file
+in `.chezmoiexternal.toml`. The first apply requires network access.
 
 `zsh-syntax-highlighting` colors commands as you type. Its script is loaded last,
 after local customizations, fzf, Atuin, and the other shell integrations.

@@ -17,11 +17,6 @@
     stripComponents = 1
     checksum.sha256 = "f39aa6564fe25847ace037b398f2b69d67e4d50974118a9ee7602eccf62cb8c6"
 
-[".config/zsh/prompts/prompt_igloo_setup"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/arcticicestudio/igloo/84471d2dfead01fd2c5327f26d17a0357c4a7139/snowblocks/zsh/lib/themes/igloo.zsh"
-    checksum.sha256 = "3ca1a9409059fef674bdbc7ef3c465316934d9a08cd60a8a24930c88db59e7e9"
-
 [".config/zsh/git-prompt.sh"]
     type = "file"
     url = "https://raw.githubusercontent.com/git/git/94f057755b7941b321fd11fec1b2e3ca5313a4e0/contrib/completion/git-prompt.sh"

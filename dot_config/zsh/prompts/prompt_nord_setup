@@ -1,0 +1,73 @@
+# Compact prompt using the terminal's Nord palette.
+prompt_nord_precmd() {
+  emulate -L zsh
+
+  local separator='%F{8} - %f'
+  local info_row='%F{8}[%F{4}%~%F{8}]%f'
+  local git_info python_version env_info
+  local -a env_segments=()
+
+  if [[ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}" ]]; then
+    info_row="%F{8}[%F{4}%n@%m%F{8}]%f${separator}${info_row}"
+  fi
+
+  if (( $+functions[__git_ps1] )); then
+    git_info=$(
+      # Request plain text; the helper otherwise pre-escapes '%' for Zsh.
+      unset ZSH_VERSION
+      GIT_PS1_SHOWCOLORHINTS= __git_ps1 '%s' 2>/dev/null
+    )
+    if [[ -n "$git_info" ]]; then
+      git_info=${git_info//$'\n'/ }
+      git_info=${git_info//\%/%%}
+      info_row+="${separator}%F{8}[%F{6}${git_info}%F{8}]%f"
+    fi
+  fi
+
+  # Show the most specific active Python environment.
+  if [[ -n "${VIRTUAL_ENV:-}" ]]; then
+    env_segments+=("venv:${VIRTUAL_ENV:t}")
+  elif [[ -n "${CONDA_DEFAULT_ENV:-}" ]]; then
+    env_segments+=("conda:${CONDA_DEFAULT_ENV}")
+  else
+    python_version=${PYENV_VERSION:-}
+    if [[ -z "$python_version" ]] && (( $+commands[pyenv] || $+functions[pyenv] )); then
+      python_version=$(pyenv version-name 2>/dev/null)
+    fi
+    if [[ -n "$python_version" && "$python_version" != system ]]; then
+      env_segments+=("pyenv:${python_version}")
+    fi
+  fi
+
+  if [[ -n "${MISE_ENV:-}" ]]; then
+    env_segments+=("mise:${MISE_ENV}")
+  fi
+
+  if (( ${#env_segments} )); then
+    env_info="${(j:, :)env_segments}"
+    env_info=${env_info//$'\n'/ }
+    env_info=${env_info//\%/%%}
+    info_row+="${separator}%F{8}[%F{2}${env_info}%F{8}]%f"
+  fi
+
+  PROMPT="${info_row}"$'\n''%(?.%F{6}.%F{1})▶%f '
+  RPROMPT=
+}
+
+prompt_nord_setup() {
+  # Treat dynamic branch and environment names as text in the prompt.
+  prompt_opts=(cr percent sp)
+
+  GIT_PS1_SHOWDIRTYSTATE=${GIT_PS1_SHOWDIRTYSTATE-true}
+  GIT_PS1_SHOWSTASHSTATE=${GIT_PS1_SHOWSTASHSTATE-true}
+  GIT_PS1_SHOWUNTRACKEDFILES=${GIT_PS1_SHOWUNTRACKEDFILES-true}
+  GIT_PS1_SHOWUPSTREAM=${GIT_PS1_SHOWUPSTREAM-auto}
+
+  autoload -Uz add-zsh-hook
+  add-zsh-hook -d precmd prompt_igloo_setup
+  add-zsh-hook precmd prompt_nord_precmd
+  prompt_cleanup 'add-zsh-hook -d precmd prompt_nord_precmd'
+  prompt_nord_precmd
+}
+
+prompt_nord_setup "$@"
