@@ -2,3 +2,8 @@
 README.md
 bootstrap.sh
 .gitignore
+homebrew
+
+{{ if not (and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64")) -}}
+.actrc
+{{ end -}}

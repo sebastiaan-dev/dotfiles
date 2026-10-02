@@ -1,28 +1,70 @@
 # Compact prompt using the terminal's Nord palette.
-prompt_nord_precmd() {
+prompt_nord_git_job() {
+  emulate -L zsh
+  # Avoid running the shell's directory hooks inside the worker.
+  builtin cd -q -- "$1" || return
+  local GIT_PS1_SHOWDIRTYSTATE=$3 GIT_PS1_SHOWSTASHSTATE=$4
+  local GIT_PS1_SHOWUNTRACKEDFILES=$5 GIT_PS1_SHOWUPSTREAM=$6
+  local GIT_PS1_SHOWCOLORHINTS= git_info
+  export GIT_OPTIONAL_LOCKS=0
+  # Request plain text; the helper otherwise pre-escapes '%' for Zsh.
+  unset ZSH_VERSION
+  git_info=$(__git_ps1 '%s' 2>/dev/null) || return
+  print -r -- "$2"$'\n'"${git_info//$'\n'/ }"
+}
+
+prompt_nord_git_format() {
+  emulate -L zsh
+  local git_info=${1//$'\n'/ }
+  git_info=${git_info//\%/%%}
+  REPLY=
+  if [[ -n "$git_info" ]]; then
+    REPLY="%F{8} - %f%F{8}[%F{6}${git_info}%F{8}]%f"
+  fi
+}
+
+prompt_nord_git_callback() {
+  emulate -L zsh
+  if [[ "$1" == '[async]' ]]; then
+    async_stop_worker nord_git &>/dev/null
+    _prompt_nord_async_ready=0
+    return 0
+  fi
+  [[ "$1" == prompt_nord_git_job && "$2" == 0 ]] || return 0
+  (( _prompt_nord_async_ready )) || return 0
+  local result=$3 request=${3%%$'\n'*}
+  [[ "$request" == "$_prompt_nord_git_request" && "$PWD" == "$_prompt_nord_git_pwd" ]] || return 0
+
+  local previous_segment=$_prompt_nord_git_segment REPLY
+  _prompt_nord_git_info=
+  [[ "$result" == *$'\n'* ]] && _prompt_nord_git_info=${result#*$'\n'}
+  prompt_nord_git_format "$_prompt_nord_git_info"
+  _prompt_nord_git_segment=$REPLY
+  [[ "$previous_segment" != "$REPLY" && -n "$previous_segment" ]] || return 0
+  [[ "$PROMPT" == *"$previous_segment"* ]] || return 0
+  # Replace only Git's segment, preserving shell integration marks and input.
+  PROMPT=${PROMPT/"$previous_segment"/"$REPLY"}
+  if zle; then
+    zle reset-prompt
+    zle -R
+  fi
+}
+
+prompt_nord_render() {
   emulate -L zsh
 
   local separator='%F{8} - %f'
   local info_row='%F{8}[%F{4}%~%F{8}]%f'
-  local git_info python_version env_info
+  local python_version env_info REPLY arrow_color=6
   local -a env_segments=()
 
   if [[ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}" ]]; then
     info_row="%F{8}[%F{4}%n@%m%F{8}]%f${separator}${info_row}"
   fi
 
-  if (( $+functions[__git_ps1] )); then
-    git_info=$(
-      # Request plain text; the helper otherwise pre-escapes '%' for Zsh.
-      unset ZSH_VERSION
-      GIT_PS1_SHOWCOLORHINTS= __git_ps1 '%s' 2>/dev/null
-    )
-    if [[ -n "$git_info" ]]; then
-      git_info=${git_info//$'\n'/ }
-      git_info=${git_info//\%/%%}
-      info_row+="${separator}%F{8}[%F{6}${git_info}%F{8}]%f"
-    fi
-  fi
+  prompt_nord_git_format "$_prompt_nord_git_info"
+  _prompt_nord_git_segment=$REPLY
+  info_row+=$REPLY
 
   # Show the most specific active Python environment.
   if [[ -n "${VIRTUAL_ENV:-}" ]]; then
@@ -50,8 +92,64 @@ prompt_nord_precmd() {
     info_row+="${separator}%F{8}[%F{2}${env_info}%F{8}]%f"
   fi
 
-  PROMPT="${info_row}"$'\n''%(?.%F{6}.%F{1})▶%f '
+  (( _prompt_nord_exit_status )) && arrow_color=1
+  PROMPT="${info_row}"$'\n'"%F{${arrow_color}}▶%f "
   RPROMPT=
+}
+
+prompt_nord_precmd() {
+  local last_status=$?
+  emulate -L zsh
+  _prompt_nord_exit_status=$last_status
+  (( ++_prompt_nord_git_request ))
+  if (( _prompt_nord_async_ready )); then
+    if ! async_flush_jobs nord_git &>/dev/null; then
+      async_stop_worker nord_git &>/dev/null
+      _prompt_nord_async_ready=0
+    fi
+  fi
+
+  if [[ "$_prompt_nord_git_pwd" != "$PWD" ]]; then
+    _prompt_nord_git_pwd=$PWD
+    _prompt_nord_git_branch=
+    _prompt_nord_git_info=
+  fi
+
+  # Branch lookup is cheap; working-tree and upstream scans run in the worker.
+  local branch
+  branch=$(command git symbolic-ref --quiet --short HEAD 2>/dev/null)
+  if [[ -z "$branch" ]]; then
+    branch=$(command git rev-parse --short HEAD 2>/dev/null)
+    [[ -n "$branch" ]] && branch="(${branch}...)"
+  fi
+  if [[ "$branch" != "$_prompt_nord_git_branch" ]]; then
+    _prompt_nord_git_branch=$branch
+    _prompt_nord_git_info=$branch
+  fi
+  prompt_nord_render
+
+  if [[ -n "$branch" ]] && (( $+functions[async_start_worker] && $+functions[__git_ps1] )); then
+    if (( ! _prompt_nord_async_ready )); then
+      async_start_worker nord_git -u -n || return 0
+      async_register_callback nord_git prompt_nord_git_callback
+      _prompt_nord_async_ready=1
+    fi
+    if ! async_job nord_git prompt_nord_git_job "$PWD" "$_prompt_nord_git_request" \
+      "$GIT_PS1_SHOWDIRTYSTATE" "$GIT_PS1_SHOWSTASHSTATE" \
+      "$GIT_PS1_SHOWUNTRACKEDFILES" "$GIT_PS1_SHOWUPSTREAM" &>/dev/null; then
+      async_stop_worker nord_git &>/dev/null
+      _prompt_nord_async_ready=0
+    fi
+  fi
+  return 0
+}
+
+prompt_nord_cleanup() {
+  add-zsh-hook -d precmd prompt_nord_precmd
+  if (( _prompt_nord_async_ready )); then
+    async_stop_worker nord_git &>/dev/null
+  fi
+  _prompt_nord_async_ready=0
 }
 
 prompt_nord_setup() {
@@ -63,10 +161,13 @@ prompt_nord_setup() {
   GIT_PS1_SHOWUNTRACKEDFILES=${GIT_PS1_SHOWUNTRACKEDFILES-true}
   GIT_PS1_SHOWUPSTREAM=${GIT_PS1_SHOWUPSTREAM-auto}
 
+  typeset -gi _prompt_nord_git_request=0 _prompt_nord_async_ready=0 _prompt_nord_exit_status=0
+  typeset -g _prompt_nord_git_pwd= _prompt_nord_git_branch= _prompt_nord_git_info= _prompt_nord_git_segment=
+
   autoload -Uz add-zsh-hook
   add-zsh-hook -d precmd prompt_igloo_setup
   add-zsh-hook precmd prompt_nord_precmd
-  prompt_cleanup 'add-zsh-hook -d precmd prompt_nord_precmd'
+  prompt_cleanup 'prompt_nord_cleanup'
   prompt_nord_precmd
 }
 

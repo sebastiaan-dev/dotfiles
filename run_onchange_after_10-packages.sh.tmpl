@@ -17,4 +17,12 @@ brew bundle install --no-upgrade --file={{ joinPath .chezmoi.destDir "Brewfile" 
 # cmake-format is distributed by the upstream cmakelang Python package.
 # Python 3.11 preserves compatibility with its older Python tooling.
 uv tool install --python 3.11 'cmakelang[YAML]==0.6.13'
+
+# gperftools no longer bundles a profile viewer. Install Google's pinned pprof.
+mkdir -p "$HOME/.local/bin"
+# Fetch from upstream; the public Go proxy does not resolve on this device.
+# Go's checksum verification remains enabled.
+GOPROXY="${GOPROXY:-direct}" \
+  GOBIN="$HOME/.local/bin" mise exec go@1.27.1 -- \
+  go install github.com/google/pprof@v0.0.0-20261001064331-60bf690a9302
 {{- end }}

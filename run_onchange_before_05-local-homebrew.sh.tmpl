@@ -1,0 +1,22 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+set -euo pipefail
+
+# Refresh the local tap when its formula or source checkout changes.
+# Formula hash: {{ include "homebrew/Formula/valgrind-macos.rb" | sha256sum }}
+# Source checkout: {{ .chezmoi.sourceDir }}
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+if ! command -v brew >/dev/null 2>&1; then
+  echo 'Homebrew is missing. Run bootstrap.sh first.' >&2
+  exit 1
+fi
+
+tap_dir="$(brew --repository)/Library/Taps/dotfiles/homebrew-profilers"
+if [[ ! -d "$tap_dir" ]]; then
+  HOMEBREW_DEVELOPER=1 brew tap-new --no-git dotfiles/profilers
+fi
+mkdir -p "$tap_dir/Formula"
+install -m 0644 {{ joinPath .chezmoi.sourceDir "homebrew/Formula/valgrind-macos.rb" | quote }} \
+  "$tap_dir/Formula/valgrind-macos.rb"
+{{- end }}

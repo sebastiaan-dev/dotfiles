@@ -34,6 +34,9 @@ and managed Zsh configuration initialize it with `brew shellenv`.
 Applying the repository installs the CLI tools and apps listed in `Brewfile`
 through Homebrew, installs cmake-format with uv, downloads shell scripts and
 tmux plugins, and writes managed configuration.
+It registers the local profiler formula before package installation and installs
+the pinned `pprof` tool using a Go toolchain managed by mise after the Homebrew
+packages.
 The package hook runs on first apply and whenever
 `Brewfile` changes. Existing package versions are not automatically upgraded.
 
@@ -79,6 +82,8 @@ The managed `.zshrc` sources `~/.zshrc.local` for machine-specific additions.
 Managed aliases cover navigation (`..`, `...`, `c`), file listings (`ll`, `la`,
 `lt`), Git (`g`, `gs`, `gd`, `gds`, `gl`), and tools (`lg`, `n`, `cz`).
 Define aliases in `~/.zshrc.local` to override these defaults.
+Use `tn <name>` to create a tmux session with that exact name or attach to it
+if it already exists. Inside tmux, the shortcut switches to the named session.
 Before the first apply on an existing Mac, review `chezmoi diff` and move any
 existing shell customizations you want to retain into that local file. Avoid
 adding a second Atuin initialization there.
@@ -97,6 +102,10 @@ virtualenv, Conda environment, or pyenv selection; a `system` pyenv selection is
 hidden. Virtualenv takes precedence over Conda and pyenv. An active `MISE_ENV`
 adds a mise environment label. SSH sessions prepend `[user@host]`.
 The input arrow turns red after a failed command.
+The branch appears immediately. Git status markers refresh asynchronously:
+the prompt keeps the last result while a background scan runs, then updates
+without interrupting typed input. Changing directories cancels the previous
+scan, and stale results are discarded.
 
 Ghostty's Cmd+K clears the screen and scrollback, then sends Ctrl+L to redraw
 both prompt lines.
@@ -112,18 +121,24 @@ flags in existing terminals after a configuration reload.
 
 The theme is managed at `~/.config/zsh/prompts/prompt_nord_setup`; edit its
 source in this repository to customize the layout. Git's prompt helper at
-`~/.config/zsh/git-prompt.sh` is installed from a pinned, checksum-verified file
+`~/.config/zsh/git-prompt.sh` and the `zsh-async` library at
+`~/.config/zsh/async.zsh` are installed from pinned, checksum-verified files
 in `.chezmoiexternal.toml`. The first apply requires network access.
 
 `zsh-syntax-highlighting` colors commands as you type. Its script is loaded last,
 after local customizations, fzf, Atuin, and the other shell integrations.
+
+Zsh command completion is initialized before fzf and the other completion
+integrations. In a directory containing a Makefile, type `make ` and press Tab
+to complete target names, or start typing a target (for example, `make deb`)
+and press Tab. Bundled Zsh and Homebrew command completions are available too.
 
 The Zsh configuration is generated from `dot_zshrc.tmpl`. On macOS with hostname
 `c0c7db20dcdc` (this Amazon work Mac), chezmoi includes a conditional branch that
 prepends `~/.toolbox/bin` to PATH. Update the hostname condition if this Mac is
 renamed.
 
-Open a new terminal after applying. Start tmux with `tmux new -s main`.
+Open a new terminal after applying. Start tmux with `tn main`.
 Within tmux, press Ctrl-Space, release it, then:
 
 - `c`: open a window in the current directory.
@@ -172,12 +187,32 @@ Keep Atuin databases, credentials, and encryption keys outside this repository.
 
 ## Developer tools
 
-`Brewfile` includes CMake, Ninja, ccache, OpenSSL 3, Python, Go, D2 (d2lang), samply,
+`Brewfile` includes CMake, Ninja, ccache, OpenSSL 3, Python, D2 (d2lang), samply,
+gperftools, Valgrind,
 zx, AWS CLI, Colima, Docker CLI, eza, bat, aria2, ripgrep, lazygit, lnav,
 hyperfine, nnn, Typst, Obsidian, Raycast, GitHub CLI, gita, jq, yq, just, LLVM,
 clang-format, mise, git-delta, ShellCheck, Rust (including Cargo), Bun, and
-AeroSpace, Worktrunk, HTTPie CLI, watchexec, Discord, and Zen Browser, alongside
-the terminal tools.
+AeroSpace, Worktrunk, Beans, HTTPie CLI, watchexec, typos-cli, act, Discord, and
+Zen Browser, alongside the terminal tools.
+
+The GitHub extension hook installs `dlvhdr/gh-dash` and `seachicken/gh-poi`
+after the package setup. It checks on each apply, skipping extensions that are
+already installed. If GitHub CLI is not authenticated yet, sign in with
+`gh auth login` and apply again. Existing extensions are not automatically
+upgraded.
+
+- `gh dash`: open the GitHub dashboard for pull requests and issues.
+- `gh poi --dry-run`: preview merged local branches eligible for cleanup.
+- `gh poi`: clean up those branches.
+- `act -l`: list GitHub Actions jobs available in the current repository.
+- `act`: run workflows locally using Docker; start Colima first with `colima start`.
+
+On Apple Silicon Macs, chezmoi manages `~/.actrc` to select native
+`linux/arm64` containers. The Ubuntu runner labels `ubuntu-latest`,
+`ubuntu-24.04`, and `ubuntu-22.04` use the ARM64 variants of
+`ghcr.io/catthehacker/ubuntu:act-*` images. A project `.actrc` or command-line
+flags can override these defaults; use `act --container-architecture=linux/amd64`
+when a workflow needs x86 containers.
 
 [cmake-format](https://cmake-format.readthedocs.io/en/latest/installation.html)
 is supplied by `cmakelang[YAML]==0.6.13`, installed with uv using Python 3.11.
@@ -202,6 +237,34 @@ directory selection; Atuin retains Ctrl-R. fd and ripgrep are also installed.
 Colima is installed without starting a VM automatically. Start its Docker runtime
 when needed with `colima start`, then use the installed `docker` CLI.
 Obsidian vaults and AWS credentials stay outside the dotfiles repository.
+
+### Profiling
+
+Valgrind is built from Louis Brunner's macOS-compatible fork at `HEAD`, using
+the local `dotfiles/profilers` Homebrew tap. Its formula is managed in
+`homebrew/Formula/valgrind-macos.rb` and registered before package installation.
+The formula carries the linker fix from upstream PR #204 until it is merged.
+The build prefers an installed SDK matching the running macOS version, allowing
+this Mac to use SDK 26.5 even when Command Line Tools select SDK 27 by default.
+
+```sh
+valgrind --leak-check=full ./program
+```
+
+gperftools supplies `libprofiler` and `libtcmalloc`. Google's standalone `pprof`
+is installed from a pinned Go module into `~/.local/bin`, using Go 1.27.1 through
+mise. For CPU profiling, link the program with `libprofiler` from
+`$(brew --prefix gperftools)/lib`,
+then collect and inspect a profile:
+
+```sh
+CPUPROFILE=profile.pprof ./program
+pprof --text profile.pprof
+```
+
+Build the program with debug information for useful function and line names.
+The profile includes executable mappings; macOS system libraries in the shared
+cache may have incomplete symbol names.
 
 ### AeroSpace
 
@@ -253,8 +316,8 @@ mise files remain tracked. Use `git add -f` if you intentionally want to commit 
 new mise file despite the global ignore rules.
 
 mise is activated in Zsh for per-project tool versions and environments.
-Choose versions with `mise use`; no language versions are installed through mise
-automatically by these dotfiles.
+Choose versions with `mise use`. The package hook installs Go 1.27.1 through mise
+to build `pprof`, without selecting it as a global or project default.
 
 ### LazyVim
 
@@ -263,6 +326,10 @@ with `nvim`. The first launch downloads lazy.nvim and installs LazyVim's plugins
 network access is required. Run `:LazyHealth` afterward to check the setup.
 Neovim, fd, fzf, tree-sitter-cli, and ripgrep are installed for its standard tools.
 Ghostty already provides a bundled font with the icons LazyVim uses.
+
+The default colorscheme is Kanso Mist, using its dark palette
+and an opaque background. Theme settings are in `lua/plugins/colorscheme.lua`;
+`lua/config/options.lua` selects the dark palette.
 
 Keep customizations in `lua/config/` and plugin specs in `lua/plugins/` in this
 repository. Plugin updates are managed with `:Lazy update`; review and optionally
@@ -276,17 +343,20 @@ brew bundle install --no-upgrade --file=~/Brewfile
 ```
 
 The hook uses `--no-upgrade` to install missing packages while keeping existing
-versions. Third-party taps for Bun and AeroSpace are declared in the Brewfile.
+versions. Third-party taps for Bun, AeroSpace, and Beans are declared in the
+Brewfile. The local profiler tap is registered by the setup hook.
 Their individual package entries use `trusted: true`, so Homebrew Bundle grants
 trust before installing them without trusting every package in either tap.
 See [Homebrew's Brewfile trust documentation](https://docs.brew.sh/Brew-Bundle-and-Brewfile#advanced-brewfiles).
 
 If an older checkout fails with `refusing to load formula ... from untrusted tap`,
-trust the two packages explicitly and rerun the bootstrap script:
+trust the packages explicitly and rerun the bootstrap script:
 
 ```sh
 brew trust --formula oven-sh/bun/bun
 brew trust --cask nikitabobko/tap/aerospace
+brew trust --cask hmans/beans/beans
+brew trust --formula dotfiles/profilers/valgrind-macos
 bash bootstrap.sh
 ```
 

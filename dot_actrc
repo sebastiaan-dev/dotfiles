@@ -1,0 +1,7 @@
+# Use native Linux ARM64 containers on Apple Silicon Macs.
+--container-architecture=linux/arm64
+
+# Ubuntu runner images that publish ARM64 variants.
+-P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest
+-P ubuntu-24.04=ghcr.io/catthehacker/ubuntu:act-24.04
+-P ubuntu-22.04=ghcr.io/catthehacker/ubuntu:act-22.04

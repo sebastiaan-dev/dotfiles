@@ -21,3 +21,8 @@
     type = "file"
     url = "https://raw.githubusercontent.com/git/git/94f057755b7941b321fd11fec1b2e3ca5313a4e0/contrib/completion/git-prompt.sh"
     checksum.sha256 = "7ff718f4a06fd0a0be7edfef926abb41b1353c48c1515ad312d226965b74943a"
+
+[".config/zsh/async.zsh"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/mafredri/zsh-async/a66d76f8404bd9e7a26037640e6c892cf5871ff4/async.zsh"
+    checksum.sha256 = "deefe9fecfe709a02a99cc846928a73703ffd18dd282afd5f07d8d8a593f8ea3"

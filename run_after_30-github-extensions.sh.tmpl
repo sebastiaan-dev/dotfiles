@@ -1,0 +1,27 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+set -euo pipefail
+
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
+
+if ! command -v gh >/dev/null 2>&1; then
+  echo 'GitHub CLI is missing. Apply the package setup first.' >&2
+  exit 1
+fi
+
+installed_extensions="$(gh extension list)"
+for extension in dlvhdr/gh-dash seachicken/gh-poi; do
+  if awk -v repo="$extension" '$3 == repo { found = 1 } END { exit !found }' \
+      <<<"$installed_extensions"; then
+    continue
+  fi
+
+  # A new Mac can finish bootstrap before the user signs in to GitHub.
+  if ! gh auth status --active --hostname github.com >/dev/null 2>&1; then
+    echo 'Sign in with gh auth login, then run chezmoi apply to install gh-dash and gh-poi.' >&2
+    exit 0
+  fi
+
+  gh extension install "$extension"
+done
+{{- end }}
