@@ -80,8 +80,9 @@ intend to commit, and pull changes into the other checkout when needed.
 
 The managed `.zshrc` sources `~/.zshrc.local` for machine-specific additions.
 Managed aliases cover navigation (`..`, `...`, `c`), file listings (`ll`, `la`,
-`lt`), Git (`g`, `gs`, `gd`, `gds`, `gl`), and tools (`lg`, `n`, `cz`).
-Define aliases in `~/.zshrc.local` to override these defaults.
+`lt`), Git (`g`, `gs`, `gd`, `gds`, `gl`), tools (`lg`, `n`, `cz`), and DuckDB
+worktree commands (`jb`, `jf`, `jt`) under `~/repos`. Define aliases in
+`~/.zshrc.local` to override these defaults.
 Use `tn <name>` to create a tmux session with that exact name or attach to it
 if it already exists. Inside tmux, the shortcut switches to the named session.
 Before the first apply on an existing Mac, review `chezmoi diff` and move any

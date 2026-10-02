@@ -33,6 +33,17 @@ alias gd='git diff'
 alias gds='git diff --staged'
 alias gl='git log --graph --oneline --decorate --all'
 
+# DuckDB shortcuts, available only from ~/repos and its worktrees.
+_jrepos() {
+  case "$PWD/" in
+    "$HOME/repos/"*) command just "$@" ;;
+    *) print -u2 'DuckDB shortcuts are available only under ~/repos'; return 2 ;;
+  esac
+}
+alias jb='_jrepos build'
+alias jf='_jrepos format'
+alias jt='_jrepos slt'
+
 # Editor and dotfile tools.
 alias lg='lazygit'
 alias n='nvim'
