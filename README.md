@@ -74,7 +74,7 @@ intend to commit, and pull changes into the other checkout when needed.
 | tmux | `~/.tmux.conf` | Ctrl-Space prefix, Alt-arrow pane navigation, Nord theme, tmux-fzf and extrakto |
 | Ghostty | `~/.config/ghostty/config.ghostty` | Nord colors, bundled 14-point font, zero padding, TUI background extension |
 | Atuin | `~/.config/atuin/config.toml` | Local history, fuzzy Ctrl-R search; normal Up-arrow behavior |
-| Zsh | `~/.zshrc` | Compact Nord prompt, tool PATH, mise, fzf, Atuin, zoxide, and syntax highlighting |
+| Zsh | `~/.zshrc` | Compact Nord prompt, tool PATH, mise, fzf, Atuin, Zoxide-backed `cd`, and syntax highlighting |
 | ccache | `~/.config/ccache/ccache.conf` | 50 GB maximum cache size |
 | LazyVim | `~/.config/nvim/` | Managed Neovim configuration |
 

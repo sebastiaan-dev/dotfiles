@@ -86,9 +86,10 @@ if command -v atuin >/dev/null 2>&1; then
   eval "$(atuin init zsh --disable-up-arrow)"
 fi
 
-# Smart directory navigation: z <name> and zi for interactive selection.
+# Smart directory navigation through Zoxide.
 if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init zsh)"
+  alias cd=z
 fi
 
 # Allow Worktrunk to switch the current shell into a worktree.
