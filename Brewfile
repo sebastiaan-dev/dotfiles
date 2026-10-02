@@ -57,6 +57,7 @@ brew "typst"
 brew "awscli"
 brew "colima"
 brew "docker"
+brew "docker-compose"
 
 # LazyVim and its search/parser tools
 brew "neovim"

@@ -190,11 +190,11 @@ Keep Atuin databases, credentials, and encryption keys outside this repository.
 
 `Brewfile` includes CMake, Ninja, ccache, OpenSSL 3, Python, D2 (d2lang), samply,
 gperftools, Valgrind,
-zx, AWS CLI, Colima, Docker CLI, eza, bat, aria2, ripgrep, lazygit, lnav,
-hyperfine, nnn, Typst, Obsidian, Raycast, GitHub CLI, gita, jq, yq, just, LLVM,
-clang-format, mise, git-delta, ShellCheck, Rust (including Cargo), Bun, and
-AeroSpace, Worktrunk, Beans, HTTPie CLI, watchexec, typos-cli, act, Discord, and
-Zen Browser, alongside the terminal tools.
+zx, AWS CLI, Colima, Docker CLI and Compose, eza, bat, aria2, ripgrep, lazygit,
+lnav, hyperfine, nnn, Typst, Obsidian, Raycast, GitHub CLI, gita, jq, yq, just,
+LLVM, clang-format, mise, git-delta, ShellCheck, Rust (including Cargo), Bun,
+and AeroSpace, Worktrunk, Beans, HTTPie CLI, watchexec, typos-cli, act, Discord,
+and Zen Browser, alongside the terminal tools.
 
 The GitHub extension hook installs `dlvhdr/gh-dash` and `seachicken/gh-poi`
 after the package setup. It checks on each apply, skipping extensions that are
@@ -236,7 +236,8 @@ zoxide provides `z` and `zi`; Go-installed tools in `~/go/bin` and Cargo-install
 tools in `~/.cargo/bin` are on PATH. fzf supplies Ctrl-T file selection and Alt-C
 directory selection; Atuin retains Ctrl-R. fd and ripgrep are also installed.
 Colima is installed without starting a VM automatically. Start its Docker runtime
-when needed with `colima start`, then use the installed `docker` CLI.
+when needed with `colima start`, then use the installed `docker` CLI and
+`docker compose` plugin.
 Obsidian vaults and AWS credentials stay outside the dotfiles repository.
 
 ### Profiling

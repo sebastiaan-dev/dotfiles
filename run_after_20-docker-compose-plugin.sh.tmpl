@@ -1,0 +1,11 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+set -euo pipefail
+
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+eval "$(brew shellenv)"
+
+mkdir -p "$HOME/.docker/cli-plugins"
+ln -sfn "$(brew --prefix)/opt/docker-compose/bin/docker-compose" \
+  "$HOME/.docker/cli-plugins/docker-compose"
+{{- end }}
