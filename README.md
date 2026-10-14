@@ -158,7 +158,8 @@ to Ctrl-Space, letting that key reach tmux. A customized input-source shortcut
 is preserved. Press Ctrl-Space twice to send it to the application.
 
 Alt-arrow keys move between panes without the prefix. Windows and panes start
-at 1, mouse support is disabled, and pane history retains 10,000 lines.
+at 1, the mouse wheel scrolls pane history one line per event, and pane history
+retains 10,000 lines.
 Key bindings and behavior are translated from `modules/home/shell.nix` in
 `vps-nix`. The configuration fixes the source's `update-environment -r` line to
 reset the default variable list with `set -gu update-environment`.
@@ -194,7 +195,15 @@ zx, AWS CLI, Colima, Docker CLI and Compose, eza, bat, aria2, ripgrep, lazygit,
 lnav, hyperfine, nnn, Typst, Obsidian, Raycast, GitHub CLI, gita, jq, yq, just,
 LLVM, clang-format, mise, git-delta, ShellCheck, Rust (including Cargo), Bun,
 and AeroSpace, Worktrunk, Beans, HTTPie CLI, watchexec, typos-cli, act, Discord,
-and Zen Browser, alongside the terminal tools.
+Zen Browser, and Pi, alongside the terminal tools.
+
+Pi is installed from Homebrew's `pi-coding-agent` formula, which also supplies
+its Node.js dependency. Start the harness with `pi` in a project directory,
+then run `/login` inside Pi to connect a model provider. Use `pi --continue`
+to resume the latest session for that directory. Update it with
+`brew upgrade pi-coding-agent`.
+Pi keeps its configuration, credentials, and sessions in `~/.pi/agent/`;
+these stay outside this repository.
 
 The GitHub extension hook installs `dlvhdr/gh-dash` and `seachicken/gh-poi`
 after the package setup. It checks on each apply, skipping extensions that are

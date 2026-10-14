@@ -36,6 +36,9 @@ brew "typos-cli"
 brew "httpie"
 brew "watchexec"
 
+# Coding agents
+brew "pi-coding-agent"
+
 # Build tools and languages
 brew "cmake"
 brew "ninja"
