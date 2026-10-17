@@ -7,3 +7,7 @@ result-*
 
 # Ignore NixOS interactive test driver history
 **/.nixos-test-history
+
+# Local Pi plotting environment and Python bytecode.
+private_dot_pi/private_agent/extensions/plot/.venv/
+**/__pycache__/

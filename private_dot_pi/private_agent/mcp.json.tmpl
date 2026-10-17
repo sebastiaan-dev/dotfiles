@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+{{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.hostname "c0c7db20dcdc") }}
+    "builder-mcp": {
+      "command": {{ joinPath .chezmoi.homeDir ".toolbox" "bin" "builder-mcp" | quote }},
+      "args": [
+        "--include-tools",
+        "*",
+        "--exclude-tools",
+        "SkillsTool,WorkspaceSearch,Delegate,ToolReactivationTool"
+      ],
+      "exposure": "deferred",
+      "description": "Amazon internal code, documentation, code reviews, tickets, and builder tools."
+    }
+{{- end }}
+  }
+}

@@ -18,6 +18,7 @@ brew "ripgrep"
 brew "lazygit"
 brew "lnav"
 brew "hyperfine"
+brew "youplot"
 brew "nnn"
 
 # Git, scripting, and project tools

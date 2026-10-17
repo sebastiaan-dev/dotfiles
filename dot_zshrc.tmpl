@@ -98,8 +98,8 @@ if command -v wt >/dev/null 2>&1; then
 fi
 
 {{ if and (eq .chezmoi.os "darwin") (eq .chezmoi.hostname "c0c7db20dcdc") -}}
-# Amazon Toolbox on this work Mac.
-export PATH="$HOME/.toolbox/bin:$PATH"
+# Amazon Toolbox and AIM MCP servers on this work Mac.
+export PATH="$HOME/.aim/mcp-servers:$HOME/.toolbox/bin:$PATH"
 {{ end -}}
 
 # Compact Nord prompt: one information row above the command input.

@@ -3,6 +3,11 @@ README.md
 bootstrap.sh
 .gitignore
 homebrew
+tests
+.pi/agent/extensions/plot/.venv
+.pi/agent/extensions/plot/.venv/**
+.pi/agent/extensions/plot/__pycache__
+.pi/agent/extensions/plot/__pycache__/**
 
 {{ if not (and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64")) -}}
 .actrc

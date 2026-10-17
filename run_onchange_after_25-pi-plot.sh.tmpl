@@ -1,0 +1,7 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+set -euo pipefail
+# Renderer dependency lock: {{ include "private_dot_pi/private_agent/extensions/plot/uv.lock" | sha256sum }}
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
+uv sync --locked --python 3.11 --project {{ joinPath .chezmoi.destDir ".pi/agent/extensions/plot" | quote }}
+{{- end }}

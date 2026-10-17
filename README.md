@@ -136,8 +136,8 @@ and press Tab. Bundled Zsh and Homebrew command completions are available too.
 
 The Zsh configuration is generated from `dot_zshrc.tmpl`. On macOS with hostname
 `c0c7db20dcdc` (this Amazon work Mac), chezmoi includes a conditional branch that
-prepends `~/.toolbox/bin` to PATH. Update the hostname condition if this Mac is
-renamed.
+prepends `~/.aim/mcp-servers` and `~/.toolbox/bin` to PATH. Update the hostname
+condition if this Mac is renamed.
 
 Open a new terminal after applying. Start tmux with `tn main`.
 Within tmux, press Ctrl-Space, release it, then:
@@ -202,8 +202,210 @@ its Node.js dependency. Start the harness with `pi` in a project directory,
 then run `/login` inside Pi to connect a model provider. Use `pi --continue`
 to resume the latest session for that directory. Update it with
 `brew upgrade pi-coding-agent`.
-Pi keeps its configuration, credentials, and sessions in `~/.pi/agent/`;
-these stay outside this repository.
+Pi keeps its user files in `~/.pi/agent/`. chezmoi manages the shared instructions,
+workflow prompts, Builder MCP configuration, Pi extensions, and theme there.
+Provider settings, credentials, model catalogs, and sessions stay local;
+the settings modifier preserves existing values while selecting the managed theme.
+
+Pi uses a custom `kanso-mist` theme matching LazyVim's Kanso Mist palette:
+charcoal panels, soft gray text, muted blue and violet accents, and matching
+syntax, diagnostic, and diff colors. Edit
+`private_dot_pi/private_agent/themes/kanso-mist.json` to customize it.
+The palette is derived from `webhooked/kanso.nvim`; its MIT license is included
+beside the theme. After applying, restart Pi or select `kanso-mist` in
+`/settings`. Changes to the active theme file reload automatically.
+
+Completed fenced `mermaid` blocks in user and assistant messages render inline
+as Unicode diagrams, using Pi's current theme colors. This uses
+`lukilabs/beautiful-mermaid` 1.1.3 for flowcharts, state/sequence/class/ER diagrams,
+and XY charts. The transformation affects the interactive display; messages,
+model context, copying, and exported source keep the original Mermaid code.
+Incomplete streaming blocks stay as source until their closing fence arrives.
+
+Previews are cached and checked against terminal width. Resize the terminal to
+show a wider diagram. Renderer failures, unsupported syntax, large diagrams,
+right-to-left flowcharts, and labels its grid cannot align retain the original
+source with a short explanation. Upstream Mermaid syntax support is a subset;
+the wrapper also accepts semicolon-separated statements. Mermaid's published
+package and its two dependencies are installed from checksum-pinned archives
+in `.chezmoiexternal.toml`, with their licenses, without running install scripts.
+Rendering is local and needs no browser or network connection.
+
+Numerical charts use YouPlot for terminal previews and Matplotlib for Kanso
+PNG/SVG figures. Pi's `plot_chart` tool reads chart JSON specs or CSV/TSV files
+with named columns. It supports lines, scatter plots, grouped bars, histograms,
+box plots and logarithmic axes. The tool returns a short summary and artifact
+paths; datasets, previews and image bytes stay outside the model's context.
+Terminals with native Pi image support can show the PNG in the tool result;
+the plotting window uses Unicode charts, including inside tmux.
+
+Use `/plot` to browse this repository's saved figures, `/plot view <id>` to
+reopen one, or `/plot import <chart.json>` to render a spec. For example:
+
+```json
+{
+  "kind": "line",
+  "title": "Parser scaling",
+  "xLabel": "Input size",
+  "yLabel": "Runtime (ms)",
+  "series": [
+    {"name": "baseline", "x": [1, 2, 4, 8], "y": [4, 8, 16, 32]},
+    {"name": "current", "x": [1, 2, 4, 8], "y": [2, 3, 5, 9]}
+  ]
+}
+```
+
+Ask Pi to plot an existing CSV/TSV using column names to keep large datasets
+out of tool arguments. Bar charts use `labels` and `y`; histograms and box
+plots use `values`. Optional `yError` values are symmetric error amounts;
+`null` means unavailable. A `{"plots": [...]}` file groups up to eight charts.
+Histogram series share bin edges. Box whiskers span min/max; boxes show
+Q1/median/Q3. Error bars appear in the PNG/SVG; terminal previews show central
+values. Logarithmic terminal coordinates are explicitly labeled `log10`.
+Unequal-length line series have separate terminal previews rather than
+padding missing observations. Figures retain the original series together.
+
+The dark Kanso plotting window uses Up/Down for history, Left/Right or Tab
+for charts, PageUp/PageDown or `j`/`k` to scroll, `o` to open the PNG, and Escape
+to close. Files, normalized specs, exact input bytes and integrity hashes stay
+private under `~/.pi/agent/plots/<id>/`, shared across repository worktrees.
+Rendering uses local subprocesses without evaluating input code or contacting
+a plotting service. Input files are limited to 32 MiB; charts to 200,000 points.
+
+Homebrew installs YouPlot from `Brewfile`. The plotting extension includes its
+Python project and `uv.lock`; a chezmoi hook installs the locked Matplotlib
+environment with Python 3.11. Runtime rendering does not install dependencies
+or use the network. To prepare the source-tree environment for tests, run
+`uv sync --locked --python 3.11 --project private_dot_pi/private_agent/extensions/plot`,
+then `node --test tests/pi-plot.test.ts`.
+
+`~/.pi/agent/AGENTS.md` is a symlink to `~/.codex/AGENTS.md`, so Codex and Pi use
+the same global instructions. Edit the Codex file to update both. Repository
+`AGENTS.md` files continue to apply in their respective directories.
+
+On the Amazon work Mac (`c0c7db20dcdc`), Pi uses the existing
+`~/.toolbox/bin/builder-mcp` installation with the same tool selection as Codex.
+Its tools load on demand through Pi's native MCP support. Authenticate with
+Midway as usual, and use `pi mcp list` or `/mcp` to check the connection.
+The managed MCP configuration contains no servers on other hosts.
+
+The following commands are available in Pi:
+
+- `/repro <bug>`: create and verify a minimal end-to-end reproduction, using
+  sqllogictest first for DuckDB.
+- `/review [scope or focus]`: review current changes or a specified revision
+  for concrete defects, with evidence and code locations.
+- `/bench <workload> [comparison]`: measure with hyperfine under reproducible
+  conditions and save timing samples, statistics and provenance.
+- `/bench` or `/bench view [latest|id]`: open the Kanso styled benchmark dashboard
+  for this repository, with a darker Kanso Ink background and rounded border.
+  Summary shows mean, median, sample standard deviation,
+  p95 estimates, ranges, sample counts, variability, RSS when exported, and mean
+  changes against a chosen baseline. Runs shows distributions and samples;
+  Details shows exact commands, measured revisions, builds and conditions.
+- `/bench import <path to hyperfine.json>`: save an existing Hyperfine export and
+  open it. Paths with spaces can be quoted. `/bench run <workload>` explicitly
+  starts measurements when the workload begins with a dashboard command.
+- `/bench plot [latest|id]` or `/plot bench [latest|id]`: chart saved benchmark
+  means with sample SD, min/max box distributions, and measured run order.
+  Baselines, failed/unverified exits and sample counts remain labeled.
+  These charts describe the saved samples; they do not run measurements.
+- `/bench-run <workload>`: prompt-only benchmarking for scripts, print mode or
+  RPC. For example, `pi -p '/bench-run measure the parser on fixtures/input.json'`.
+- `/handoff <next goal>`: summarize the relevant conversation, let you edit the
+  resulting prompt, and open a new session with that draft ready to submit.
+- `/delegate <task>`: use scout, planner, reviewer, or worker subagents, with
+  parallel investigations or sequential tasks as appropriate.
+- `/subagents`: list recent jobs for this repository; `/subagents latest` or
+  `/subagents <job-id>` shows task status and artifact locations.
+- `/subagents resume latest` or `/subagents resume <job-id>`: ask the parent
+  to continue unfinished tasks with their saved sessions and worktrees.
+
+The workflow commands use managed Markdown prompt templates. `/bench` also has
+a native dashboard and a validated benchmark workflow.
+Handoff and the subagent progress display use Pi's upstream extensions pinned
+to `v1.0.0`, with MIT licenses and SHA256 checksums in `.chezmoiexternal.toml`.
+The managed subagent coordinator supplies worktree assignment and persistence.
+Open a new Pi session or run `/reload` after applying changes.
+
+In the benchmark dashboard, use Up/Down for history, Left/Right or Tab for tabs,
+`b` to cycle the baseline (including none), `c` to switch the sample case,
+`y` to copy only a Markdown table of results comparing baseline and current,
+PageUp/PageDown or `j`/`k` to scroll, `r` to refresh, and Escape to close.
+The table places the selected baseline beside every current case and includes
+timing statistics, CPU/RSS measurements when available, and relative mean change.
+The window shows confirmation or clipboard errors without starting a model turn.
+History is shared across a repository's worktrees. Saved results live privately
+under `~/.pi/agent/benchmarks/<id>/`, with the original `hyperfine.json`, a
+checksum, and a metadata manifest; raw samples stay outside model context.
+The `benchmark_results` tool validates exports and returns a compact summary.
+Failed or unverified measured exits disable comparisons. Unknown measurement
+metadata stays unrecorded; the importing host and HEAD are labeled separately.
+Baseline selection is local to the view and does not alter saved metadata.
+Timing differences are descriptive, and small samples limit p95 resolution.
+Run `node --test tests/pi-bench.test.ts` to validate actual Hyperfine imports,
+the native Pi command/tool integration, statistics, persistence and the UI.
+
+Subagents run in separate Pi processes and inherit the parent session's model,
+thinking level, and global instructions, including the existing Astra setup.
+Agent definitions live in `~/.pi/agent/agents/`. Scout and planner have reading
+tools; reviewer also has shell access for checks, and worker can edit.
+The explicit tool lists exclude further delegation and MCP tools; the parent
+can provide Builder MCP findings. Each agent returns progress and usage
+information to the parent. User agents are selected by default.
+
+Use `/delegate review the current changes`, or
+`/delegate run two scouts in parallel: map the parser and map its tests`.
+Workers require explicit owned files or directory prefixes, for example
+`files: ["src/", "tests/"]`. Without `cwd`, the coordinator creates a distinct
+`wt` worktree from the source HEAD and copies the current tracked and untracked
+working contents. The source's index and files stay intact. Ignored files/build
+outputs and submodule working contents are not copied. Existing assignments
+must be registered worktrees of the same repository, distinct from the source.
+Concurrent tasks hold shared reading or exclusive writing leases. In a chain,
+`worktreeFrom: 2` reuses the directory from step 2 for review or further work.
+
+Jobs persist under `~/.pi/agent/subagents/jobs/<job-id>/` with private permissions.
+Each task retains its native session, attempt logs, result, and summary; the job
+manifest records status, file ownership, directories, and branches. Resume
+retains completed tasks and continues unfinished ones in their original sessions.
+Cancellation stops child process groups and preserves partial results.
+Worktrees remain available for inspection; integration and cleanup belong to
+the parent. Pi's edit/write tools enforce the assigned directory and file paths;
+shell commands retain normal filesystem permissions. The coordinator reports
+tracked/untracked changes outside ownership and HEAD changes as failures.
+
+Pi's Bash tool accepts `quiet: true` for build, test, lint, and formatting checks
+in the main session and subagents. Successful checks return only their status,
+duration, and saved log path. Failed checks return up to 12 KiB of early
+diagnostics and the final output, with log line numbers. This includes C++ compiler
+and linker failures, Ninja/CMake/CTest, Cargo compiler JSON, Rust panics, Clippy,
+rustfmt, and clang-format. Quiet checks enable shell `pipefail` and CTest's failed
+test output; use `&&` between dependent checks.
+
+Full combined stdout/stderr and command metadata are saved with private
+permissions under `~/.pi/agent/checks/<timestamp-id>/`. Read or grep the log
+when the excerpt is insufficient. Logs remain until removed. Successful warnings
+are also retained there; use ordinary Bash output when auditing warnings,
+benchmarking, inspecting files, or reviewing formatter diffs. The tool's prompt
+guidelines and worker/reviewer instructions select quiet mode for status checks.
+For example, a tool call can use
+`{"command":"cargo test --offline","quiet":true}` or
+`{"command":"cmake --build build/reldebug && ctest --test-dir build/reldebug","quiet":true}`.
+
+To validate the coordinator with temporary Git repositories, real `wt`
+worktrees, and local child-process fixtures, and the quiet wrapper with real
+C++/Rust builds and checks (requires installed Pi, CMake, Ninja, clang-format,
+and Cargo with rustfmt/Clippy):
+
+```sh
+node --test tests/pi-subagents.test.ts tests/pi-quiet-bash.test.ts
+```
+
+To validate Mermaid rendering through Pi's native chat components, apply the
+extension first, then run `node --test tests/pi-mermaid.test.ts`.
+For isolated testing, set `PI_MERMAID_VENDOR` to the pinned package directory
+containing `dist/index.js` and its installed runtime dependencies.
 
 The GitHub extension hook installs `dlvhdr/gh-dash` and `seachicken/gh-poi`
 after the package setup. It checks on each apply, skipping extensions that are
